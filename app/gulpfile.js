@@ -9,6 +9,8 @@ var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var assign = require('lodash.assign');
 var htmlmin = require('gulp-htmlmin');
+var nodemon    = require('gulp-nodemon');
+var livereload = require('gulp-livereload');
 
 // add custom browserify options here
 var customOpts = {
@@ -21,7 +23,7 @@ var b = watchify(browserify(opts));
 // add transformations here
 // i.e. b.transform(coffeeify);
 
-b.on('update', bundle); // on any dep update, runs the bundler
+//b.on('update', bundle); // on any dep update, runs the bundler
 b.on('log', gutil.log); // output build logs to terminal
 
 gulp.task('views1', [], function () {
@@ -39,7 +41,12 @@ gulp.task('views2', [], function(){
         .pipe(gulp.dest('./build/views'));
 });
 
-function bundle() {
+gulp.task('develop', function () {
+  nodemon({script: './app.js', ext: 'js json', legacyWatch: true });
+});
+
+gulp.task('bundle', function(){
+    console.log("going gto r");
   return b.bundle()
     // log errors if they happen
     .on('error', gutil.log.bind(gutil, 'Browserify Error'))
@@ -50,8 +57,21 @@ function bundle() {
     .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
        // Add transformation tasks to the pipeline here.
     .pipe(sourcemaps.write('./')) // writes .map file
-    .pipe(gulp.dest('./build'));
-}
+    .pipe(gulp.dest('./build'))
+    .pipe(livereload());
+});
 
-gulp.task('views', ['views1', 'views2'], function(){});
-gulp.task('build', ['views'], bundle); // so you can run `gulp js` to build the file
+gulp.task('views', ['views1', 'views2'], function(){
+    console.log('views rebuilding');
+    livereload();
+});
+
+//gulp.watch('./public/scss/**/*.scss', ['sass']);
+
+gulp.task('build', ['views', 'bundle'], function(){
+    nodemon({script: './app.js', ext: 'js json', legacyWatch: true, delayTime: 1 });
+    livereload.listen();
+    
+    gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['bundle']);
+    gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views']);
+}); // so you can run `gulp js` to build the file

@@ -11,6 +11,6 @@ app.all('/*', function(req, res) {
 
 app.listen(4343, function () {
 
-    console.log('Modern Web!');
+    console.log('Modern Web Cool!');
 
 });
