@@ -4,7 +4,7 @@
   "description": "Simple Modern Web App",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "gulp --gulpfile app/gulpfile.js"
   },
   "keywords": [
     "browserify",
@@ -15,10 +15,10 @@
   "author": "pplavetzki",
   "license": "MIT",
   "devDependencies": {
+    "browser-sync": "^2.12.8",
     "browserify": "^13.0.1",
     "gulp": "^3.9.1",
     "gulp-htmlmin": "^2.0.0",
-    "gulp-livereload": "^3.8.1",
     "gulp-nodemon": "^2.0.7",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-util": "^3.0.7",

@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+    web:
+        build:
+            context: .
+            dockerfile: node.dockerfile
+        image: modern-web
+        volumes:
+            - "./app:/modern-web/app"
+        ports:
+            - "8888:4343"
