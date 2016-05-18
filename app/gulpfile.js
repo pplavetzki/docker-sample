@@ -1,6 +1,6 @@
 'use strict';
 
-var watchify = require('watchify');
+//var watchify = require('watchify');
 var browserify = require('browserify');
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
@@ -10,26 +10,14 @@ var sourcemaps = require('gulp-sourcemaps');
 var assign = require('lodash.assign');
 var htmlmin = require('gulp-htmlmin');
 var nodemon    = require('gulp-nodemon');
+var uglify = require('gulp-uglify');
+var cache = require('gulp-file-cache')();
 
 var browserSync = require('browser-sync').create();
 var reload      = browserSync.reload;
 
 var debug = true;
 var port = 4343;
-
-// add custom browserify options here
-var customOpts = {
-  entries: ['./source/index.js'],
-  debug: true
-};
-var opts = assign({}, watchify.args, customOpts);
-var b = watchify(browserify(opts)); 
-
-// add transformations here
-// i.e. b.transform(coffeeify);
-
-b.on('update', bundle); // on any dep update, runs the bundler
-b.on('log', util.log); // output build logs to terminal
 
 gulp.task('views1', [], function () {
     "use strict";
@@ -46,21 +34,28 @@ gulp.task('views2', [], function(){
         .pipe(gulp.dest('./build/views'));
 });
 
-function bundle() {
-    return b.bundle()
-    // log errors if they happen
-    .on('error', util.log.bind(util, 'Browserify Error'))
-    .pipe(source('bundle.js'))
-    // optional, remove if you don't need to buffer file contents
-    .pipe(buffer())
-    // optional, remove if you dont want sourcemaps
-    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-       // Add transformation tasks to the pipeline here.
-    .pipe(sourcemaps.write('./')) // writes .map file
-    .pipe(gulp.dest('./build'));
-}
+// javascript task
+gulp.task('javascript', function () {
+  // set up the browserify instance on a task basis
+  var b = browserify({
+    insertGlobals: true,
+    entries: './source/index.js',
+    debug: true
+  });
 
-gulp.task('bundle', bundle);
+  return b.bundle()
+    .pipe()
+    .pipe(source('bundle.js'))
+    .pipe(buffer())
+    
+    .pipe(sourcemaps.init({loadMaps: true}))
+    // Add transformation tasks to the pipeline here.
+    .pipe(uglify({compress:{drop_console:true}}))
+    .on('error', util.log)
+    .pipe(sourcemaps.write('./'))
+    
+    .pipe(gulp.dest('./build/'));
+});
 
 gulp.task('views', ['views1', 'views2'], function(){
     console.log('views rebuilding');
@@ -110,15 +105,15 @@ function log(msg) {
 }
 
 function startNodemon() {
-    nodemon({script: './app.js', env: { 'PORT': port }, delayTime: 1 })
+    return nodemon({script: './app.js', ext: 'js html', env: { 'PORT': port }, watch: 'source', tasks: ['compile'] })
         .on('restart', [], function(ev) {
             log('*** nodemon restarted');
             log('files changed:\n' + ev);
             
             setTimeout(function() {
                 browserSync.notify('reloading now ...');
-                reload({stream:true});
-            }, 100);
+                reload({stream:false});
+            }, 0);
             
         })
         .on('start', function () {
@@ -133,13 +128,17 @@ function startNodemon() {
         });
 }
 
+gulp.task('compile', ['views', 'javascript'], function(){});
+
 gulp.task('watch', [], function(){
-    gulp.watch(['./source/*.html', './source/**/*.html'], ['views', reload]);
+    log('watching...');
+    gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['javascript', reload]);
+    gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views', reload]);
 });
 
-gulp.task('default', ['views', 'bundle', 'watch'], function() {
+gulp.task('default', ['compile'], function() {
     startNodemon();
     
-    //gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['bundle', reload]);
-    //gulp.watch(['app/source/*.html', 'app/source/**/*.html']).on("change", ['views', reload]);
+    //gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['javascript', reload]);
+    //gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views', reload]);
 }); // so you can run `gulp js` to build the file
