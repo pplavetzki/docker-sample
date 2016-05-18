@@ -146,15 +146,6 @@ function startNodemon() {
 
 gulp.task('compile', ['views', 'javascript'], function(){});
 
-gulp.task('watch', [], function(){
-    log('watching...');
-    gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['javascript', reload]);
-    gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views', reload]);
-});
-
-gulp.task('default', ['views', 'javascript'], function() {
+gulp.task('default', ['compile'], function() {
     startNodemon();
-    
-    //gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['javascript', reload]);
-    //gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views', reload]);
 }); // so you can run `gulp js` to build the file

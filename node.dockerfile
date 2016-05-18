@@ -12,7 +12,6 @@ WORKDIR /modern-web
 ADD app/package.json /modern-web/package.json
 RUN npm install
 
-EXPOSE 4343
 EXPOSE 8888
 
 CMD ["npm", "start"]
