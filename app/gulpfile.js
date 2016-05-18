@@ -11,13 +11,49 @@ var assign = require('lodash.assign');
 var htmlmin = require('gulp-htmlmin');
 var nodemon    = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
-var cache = require('gulp-file-cache')();
+var watchify = require('watchify');
 
 var browserSync = require('browser-sync').create();
 var reload      = browserSync.reload;
 
 var debug = true;
 var port = 4343;
+
+// set up the browserify instance on a task basis
+var bundler = watchify(browserify({
+    insertGlobals: true,
+    entries: './source/index.js',
+    debug: debug,
+    cache: {}, 
+    packageCache: {}
+}), {
+    ignoreWatch: ['**/node_modules/**'],
+    poll: true
+}); 
+
+bundler.on('update', function(){
+    log('calling browserify update');
+    bundle();
+    setTimeout(function() {
+        browserSync.notify('reloading now ...');
+        reload({stream:false});
+    }, 100);
+});
+
+function bundle() {
+    return bundler.bundle()
+        .on('error', util.log.bind(util, 'Browserify Error'))
+        .pipe(source('bundle.js'))
+        .pipe(buffer())
+
+        .pipe(sourcemaps.init({loadMaps: true}))
+        // Add transformation tasks to the pipeline here.
+        .pipe(uglify({compress:{drop_console:true}}))
+        .on('error', util.log)
+        .pipe(sourcemaps.write('./'))
+
+        .pipe(gulp.dest('./build/')); 
+}
 
 gulp.task('views1', [], function () {
     "use strict";
@@ -35,27 +71,7 @@ gulp.task('views2', [], function(){
 });
 
 // javascript task
-gulp.task('javascript', function () {
-  // set up the browserify instance on a task basis
-  var b = browserify({
-    insertGlobals: true,
-    entries: './source/index.js',
-    debug: true
-  });
-
-  return b.bundle()
-    .pipe()
-    .pipe(source('bundle.js'))
-    .pipe(buffer())
-    
-    .pipe(sourcemaps.init({loadMaps: true}))
-    // Add transformation tasks to the pipeline here.
-    .pipe(uglify({compress:{drop_console:true}}))
-    .on('error', util.log)
-    .pipe(sourcemaps.write('./'))
-    
-    .pipe(gulp.dest('./build/'));
-});
+gulp.task('javascript', [], bundle);
 
 gulp.task('views', ['views1', 'views2'], function(){
     console.log('views rebuilding');
@@ -105,7 +121,7 @@ function log(msg) {
 }
 
 function startNodemon() {
-    return nodemon({script: './app.js', ext: 'js html', env: { 'PORT': port }, watch: 'source', tasks: ['compile'] })
+    return nodemon({script: './app.js', ext: 'html', env: { 'PORT': port }, legacyWatch: true, watch: 'source', tasks: ['views'] })
         .on('restart', [], function(ev) {
             log('*** nodemon restarted');
             log('files changed:\n' + ev);
@@ -136,7 +152,7 @@ gulp.task('watch', [], function(){
     gulp.watch(['app/source/*.html', 'app/source/**/*.html'], ['views', reload]);
 });
 
-gulp.task('default', ['compile'], function() {
+gulp.task('default', ['views', 'javascript'], function() {
     startNodemon();
     
     //gulp.watch(['app/source/*.js', 'app/source/**/*.js'], ['javascript', reload]);

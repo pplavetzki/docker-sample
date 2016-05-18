@@ -9,4 +9,5 @@ services:
         volumes:
             - "./app:/modern-web/app"
         ports:
-            - "8888:4343"
+            - "8888:8888"
+            - "3001:3001"
