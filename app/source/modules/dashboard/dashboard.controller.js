@@ -10,7 +10,7 @@ Dashboard.$inject = ['$state'];
 
 function Dashboard ($state) {
     var vm = this;
-    vm.testVar = 'We are up and running cool from a required module with a vm!';
+    vm.testVar = 'We are up and running cooly from a required module with a vm!';
 
     vm.gotoAnalysis = function() {
         $state.go('app.workflow');

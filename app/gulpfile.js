@@ -73,9 +73,7 @@ gulp.task('views2', [], function(){
 // javascript task
 gulp.task('javascript', [], bundle);
 
-gulp.task('views', ['views1', 'views2'], function(){
-    console.log('views rebuilding');
-});
+gulp.task('views', ['views1', 'views2'], function(){});
 
 function startBrowserSync(isDev, specRunner) {
     'use strict';

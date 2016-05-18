@@ -2,6 +2,7 @@ version: '2'
 
 services:
     web:
+        container_name: web
         build:
             context: .
             dockerfile: node.dockerfile
@@ -11,3 +12,14 @@ services:
         ports:
             - "8888:8888"
             - "3001:3001"
+        networks:
+            - modern-web-network
+    db:
+        container_name: redis-db
+        image: redis
+        networks:
+            - modern-web-network
+
+networks:
+    modern-web-network:
+        driver: bridge

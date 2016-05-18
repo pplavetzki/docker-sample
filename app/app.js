@@ -1,6 +1,13 @@
 var express = require('express');
+var redis = require('redis');
 
 var app = express();
+
+var client = redis.createClient(6379, 'redis-db');
+
+client.on('connect', function(){
+    console.log('connected to redis'); 
+});
 
 app.use(express.static('./build'));
 app.use(express.static('.'));

@@ -15,7 +15,6 @@ require('./modules/services');
 setup.$inject = ['$rootScope', '$location', '$window'];
 
 function setup($rootScope, $location, $window){
-    console.log("hellow");
     /*
     $rootScope.$on("$locationChangeStart", function (event, next, current) {
         //Do your things
