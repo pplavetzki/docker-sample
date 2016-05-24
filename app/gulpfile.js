@@ -16,6 +16,10 @@ var watchify = require('watchify');
 var browserSync = require('browser-sync').create();
 var reload      = browserSync.reload;
 
+var couchViews = require('./server-source/couch-views');
+
+var push = require('couchdb-push');
+
 var debug = true;
 var port = 4343;
 
@@ -72,6 +76,17 @@ gulp.task('views2', [], function(){
 
 // javascript task
 gulp.task('javascript', [], bundle);
+
+gulp.task('couch-views', [], function() {
+    push('http://10.211.55.74:5984/configs', './server-source/couch-views/configs', {index:true}, function(err, resp) {
+    if(err){
+        log(err);
+    }
+    else {
+        log(resp);
+    }
+    });
+});
 
 gulp.task('views', ['views1', 'views2'], function(){});
 

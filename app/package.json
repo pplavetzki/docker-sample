@@ -17,6 +17,7 @@
   "devDependencies": {
     "browser-sync": "^2.12.8",
     "browserify": "^13.0.1",
+    "couchdb-push": "^2.3.1",
     "gulp": "^3.9.1",
     "gulp-htmlmin": "^2.0.0",
     "gulp-nodemon": "^2.0.7",
@@ -32,10 +33,12 @@
     "angular": "^1.5.5",
     "angular-bootstrap": "^0.12.2",
     "angular-ui-router": "^0.2.18",
+    "couchdb-push": "^2.3.1",
     "express": "^4.13.4",
     "hiredis": "^0.4.1",
     "jquery": "^2.2.3",
     "lodash": "^4.12.0",
+    "nano": "^6.2.0",
     "redis": "^2.6.0-2"
   }
 }

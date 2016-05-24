@@ -1,0 +1,1 @@
+# simple design view for configs

@@ -14,9 +14,16 @@ services:
             - "3001:3001"
         networks:
             - modern-web-network
-    db:
+    cache:
         container_name: redis-db
         image: redis
+        networks:
+            - modern-web-network
+    db:
+        container_name: coach-db
+        image: couchdb
+        ports:
+            - "5984:5984"
         networks:
             - modern-web-network
 
