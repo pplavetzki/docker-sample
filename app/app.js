@@ -1,6 +1,9 @@
 var express = require('express');
 var redis = require('redis');
 
+//routes
+var sampleRoutes = require('./server-source/routes/sample')
+
 var app = express();
 
 var client = redis.createClient(6379, 'redis-db');
@@ -11,6 +14,8 @@ client.on('connect', function(){
 
 app.use(express.static('./build'));
 app.use(express.static('.'));
+
+app.use('/sample', sampleRoutes);
 
 app.all('/*', function(req, res) {
     res.sendFile('index.html', { root: 'build' });

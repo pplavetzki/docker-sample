@@ -33,6 +33,7 @@
     "angular": "^1.5.5",
     "angular-bootstrap": "^0.12.2",
     "angular-ui-router": "^0.2.18",
+    "body-parser": "^1.15.1",
     "couchdb-push": "^2.3.1",
     "express": "^4.13.4",
     "hiredis": "^0.4.1",
