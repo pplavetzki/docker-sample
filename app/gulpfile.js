@@ -16,6 +16,9 @@ var watchify = require('watchify');
 var browserSync = require('browser-sync').create();
 var reload      = browserSync.reload;
 
+var gulp = require("gulp");
+var babel = require("gulp-babel");
+
 var couchViews = require('./server-source/couch-views');
 
 var push = require('couchdb-push');
@@ -56,7 +59,7 @@ function bundle() {
         .on('error', util.log)
         .pipe(sourcemaps.write('./'))
 
-        .pipe(gulp.dest('./build/')); 
+        .pipe(gulp.dest('./build/source')); 
 }
 
 gulp.task('views1', [], function () {
@@ -64,18 +67,30 @@ gulp.task('views1', [], function () {
     return gulp.src('./source/index.html')
         // And put it in the dist folder
         .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest('./build/source'));
 });
 
 gulp.task('views2', [], function(){
     "use strict";
     return gulp.src(['!./source/*', './source/**/*.html'])
         .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./build/views'));
+        .pipe(gulp.dest('./build/source/views'));
 });
 
 // javascript task
 gulp.task('javascript', [], bundle);
+
+gulp.task("server-root", [], function(){
+  return gulp.src(['./app.js', './config.js'])
+    .pipe(babel())
+    .pipe(gulp.dest("./build"));
+});
+
+gulp.task("server-code", ['server-root'], function () {
+  return gulp.src(["./server-source/**/*.js", "!./server-source/couch-views/**"])
+    .pipe(babel())
+    .pipe(gulp.dest("./build/server-source"));
+});
 
 gulp.task('couch-views', [], function() {
     push('http://10.211.55.74:5984/configs', './server-source/couch-views/configs', {index:true}, function(err, resp) {
@@ -134,7 +149,7 @@ function log(msg) {
 }
 
 function startNodemon() {
-    return nodemon({script: './app.js', ext: 'html', env: { 'PORT': port }, legacyWatch: true, watch: 'source', tasks: ['views'] })
+    return nodemon({script: './build/app.js', ext: 'html', env: { 'PORT': port }, legacyWatch: true, watch: 'source', tasks: ['views'] })
         .on('restart', [], function(ev) {
             log('*** nodemon restarted');
             log('files changed:\n' + ev);
@@ -157,7 +172,7 @@ function startNodemon() {
         });
 }
 
-gulp.task('compile', ['views', 'javascript'], function(){});
+gulp.task('compile', ['views', 'javascript', 'server-code'], function(){});
 
 gulp.task('default', ['compile'], function() {
     startNodemon();

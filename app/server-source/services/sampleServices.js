@@ -1,12 +1,12 @@
-var configs = require('../../config');
-var nano = require('nano')(configs.couchdb);
+import {settings} from "../../config";
 
-function getSamples() {
-    return [{value1:'value data1'}, {value2:'value data2'}];
+var nano = require('nano')(settings.couchdb);
+
+class SampleService {
+    constructor() {}
+    static getSamples() {
+        return [{value1:'value data1'}, {value2:'value data2'}];
+    }
 }
 
-function sampleService() {
-    this.getSamples = getSamples;
-}
-
-module.exports = sampleService();
+export {SampleService};

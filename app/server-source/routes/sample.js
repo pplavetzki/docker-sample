@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var sampleService = require('../services/sampleServices');
+
+import {SampleService} from "../services/SampleServices";
 
 var sample = express.Router();
 
@@ -15,7 +16,7 @@ sample.get('/', function (req, res) {
 sample.post('/', jsonParser, function (req, res) {
   if (!req.body) return res.sendStatus(400)
   res.type('json');
-  res.json(JSON.parse(sampleService.getSamples()));
+  res.json(JSON.stringify(SampleService.getSamples()));
 })
 
-module.exports = sample;
+export var sampleRoutes = sample;
