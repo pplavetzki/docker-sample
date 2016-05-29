@@ -148,8 +148,19 @@ function log(msg) {
     }
 }
 
+function nodeOptions() {
+    return {
+        script: './build/app.js', 
+        ext: 'html', 
+        env: { 'PORT': port }, 
+        legacyWatch: true, 
+        watch: 'source', 
+        tasks: ['views'] 
+    };
+}
+
 function startNodemon() {
-    return nodemon({script: './build/app.js', ext: 'html', env: { 'PORT': port }, legacyWatch: true, watch: 'source', tasks: ['views'] })
+    return nodemon(nodeOptions())
         .on('restart', [], function(ev) {
             log('*** nodemon restarted');
             log('files changed:\n' + ev);
@@ -172,8 +183,19 @@ function startNodemon() {
         });
 }
 
+gulp.watch(["./server-source/**/*.js", "!./server-source/couch-views/**", './app.js', './config.js'], ['server-code'], function(){
+   reload({stream:false}); 
+});
+
+gulp.task('watch', [], function(){
+    gulp.watch(["./server-source/**/*.js", "!./server-source/couch-views/**", './app.js', './config.js'], ['server-code'], function() {
+        log("about to reload!");
+        reload({stream:false}); 
+    });
+});
+
 gulp.task('compile', ['views', 'javascript', 'server-code'], function(){});
 
-gulp.task('default', ['compile'], function() {
+gulp.task('default', ['compile', 'watch'], function() {
     startNodemon();
 }); // so you can run `gulp js` to build the file
