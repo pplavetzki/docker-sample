@@ -5,7 +5,7 @@ var nano = require('nano')(settings.couchdb);
 class SampleService {
     constructor() {}
     static getSamples() {
-        return [{value1:'value data1 here new'}, {value2:'value data2 here new'}];
+        return [{value1:'value data 1'}, {value2:'value data 2'}];
     }
 }
 

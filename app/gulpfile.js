@@ -1,13 +1,12 @@
 'use strict';
 
-//var watchify = require('watchify');
 var browserify = require('browserify');
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var util = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
-var assign = require('lodash.assign');
+
 var htmlmin = require('gulp-htmlmin');
 var nodemon    = require('gulp-nodemon');
 var uglify = require('gulp-uglify');
@@ -22,6 +21,8 @@ var babel = require("gulp-babel");
 var couchViews = require('./server-source/couch-views');
 
 var push = require('couchdb-push');
+
+var path = require('path');
 
 var debug = true;
 var port = 4343;
@@ -61,49 +62,6 @@ function bundle() {
 
         .pipe(gulp.dest('./build/source')); 
 }
-
-gulp.task('views1', [], function () {
-    "use strict";
-    return gulp.src('./source/index.html')
-        // And put it in the dist folder
-        .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./build/source'));
-});
-
-gulp.task('views2', [], function(){
-    "use strict";
-    return gulp.src(['!./source/*', './source/**/*.html'])
-        .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./build/source/views'));
-});
-
-// javascript task
-gulp.task('javascript', [], bundle);
-
-gulp.task("server-root", [], function(){
-  return gulp.src(['./app.js', './config.js'])
-    .pipe(babel())
-    .pipe(gulp.dest("./build"));
-});
-
-gulp.task("server-code", ['server-root'], function () {
-  return gulp.src(["./server-source/**/*.js", "!./server-source/couch-views/**"])
-    .pipe(babel())
-    .pipe(gulp.dest("./build/server-source"));
-});
-
-gulp.task('couch-views', [], function() {
-    push('http://10.211.55.74:5984/configs', './server-source/couch-views/configs', {index:true}, function(err, resp) {
-    if(err){
-        log(err);
-    }
-    else {
-        log(resp);
-    }
-    });
-});
-
-gulp.task('views', ['views1', 'views2'], function(){});
 
 function startBrowserSync(isDev, specRunner) {
     'use strict';
@@ -151,11 +109,23 @@ function log(msg) {
 function nodeOptions() {
     return {
         script: './build/app.js', 
-        ext: 'html', 
+        ext: 'html js', 
         env: { 'PORT': port }, 
-        legacyWatch: true, 
-        watch: 'source', 
-        tasks: ['views'] 
+        legacyWatch: true,
+        verbose: true,
+        delay: '1000ms',
+        watch: ['server-source/**/*.js', 'server-source/*.js',  'app.js', 'source/**/*.html'],
+        //watch: ['./source/**/*.html', './source/*.html', './server-source/**/*.js', './server-source/*.js'],
+        ignore: ["server-source/couch-views"],
+        tasks: function (changedFiles) {
+                    var tasks = [];
+                    changedFiles.forEach(function (file) {
+                        console.log('changed file2: ' + file);
+                        if (path.extname(file) === '.js' && !~tasks.indexOf('server-code')) tasks.push('server-code')
+                        if (path.extname(file) === '.html' && !~tasks.indexOf('views')) tasks.push('views')
+                    })
+                    return tasks
+                }
     };
 }
 
@@ -168,12 +138,14 @@ function startNodemon() {
             setTimeout(function() {
                 browserSync.notify('reloading now ...');
                 reload({stream:false});
-            }, 0);
+            }, 1000);
             
         })
         .on('start', function () {
             log('*** nodemon started');
-            startBrowserSync(true, false);
+            setTimeout(function() {
+                startBrowserSync(true, false);
+            }, 1000);
         })
         .on('crash', function () {
             log('*** nodemon crashed: script crashed for some reason');
@@ -183,19 +155,51 @@ function startNodemon() {
         });
 }
 
-gulp.watch(["./server-source/**/*.js", "!./server-source/couch-views/**", './app.js', './config.js'], ['server-code'], function(){
-   reload({stream:false}); 
+gulp.task('views1', [], function () {
+    "use strict";
+    return gulp.src('./source/index.html')
+        // And put it in the dist folder
+        .pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulp.dest('./build/source'));
 });
 
-gulp.task('watch', [], function(){
-    gulp.watch(["./server-source/**/*.js", "!./server-source/couch-views/**", './app.js', './config.js'], ['server-code'], function() {
-        log("about to reload!");
-        reload({stream:false}); 
+gulp.task('views2', [], function(){
+    "use strict";
+    return gulp.src(['!./source/*', './source/**/*.html'])
+        .pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulp.dest('./build/source/views'));
+});
+
+// javascript task
+gulp.task('javascript', [], bundle);
+
+gulp.task("server-root", [], function(){
+  return gulp.src(['./app.js', './config.js'])
+    .pipe(babel())
+    .pipe(gulp.dest("./build"));
+});
+
+gulp.task("server-code", ['server-root'], function () {
+  return gulp.src(["./server-source/**/*.js", "!./server-source/couch-views/**"])
+    .pipe(babel())
+    .pipe(gulp.dest("./build/server-source"));
+});
+
+gulp.task('couch-views', [], function() {
+    push('http://10.211.55.74:5984/configs', './server-source/couch-views/configs', {index:true}, function(err, resp) {
+    if(err){
+        log(err);
+    }
+    else {
+        log(resp);
+    }
     });
 });
 
+gulp.task('views', ['views1', 'views2'], function(){});
+
 gulp.task('compile', ['views', 'javascript', 'server-code'], function(){});
 
-gulp.task('default', ['compile', 'watch'], function() {
-    startNodemon();
+gulp.task('default', ['compile'], function() {
+    return startNodemon();
 }); // so you can run `gulp js` to build the file
