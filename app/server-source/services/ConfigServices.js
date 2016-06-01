@@ -3,12 +3,10 @@ import {processConfigFile} from "../processing/lib/junos-config";
 
 var nano = require('nano')(settings.couchdb);
 
-class SampleService {
+class ConfigServices {
     constructor() {}
-    static getSamples() {
-        return [{value1:'value data 1'}, {value2:'value data 2'}];
-    }
-    static postConfig(callback) {
+
+    static saveConfig(callback) {
         processConfigFile((config) => {
             
             var configs = nano.use('configs');
@@ -17,8 +15,15 @@ class SampleService {
                 else callback(null, body);
             });
             
-}       );
+        });
     }
+    static getConfig(id, callback) {
+        var configs = nano.use('configs');
+        configs.get(id, { revs_info: false }, (err, body) => {
+            if (err) callback(err);
+            else callback(null, body);
+        });
+   }
 }
 
-export {SampleService};
+export {ConfigServices};

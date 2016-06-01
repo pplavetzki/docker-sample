@@ -8,8 +8,11 @@ var sample = express.Router();
 var jsonParser = bodyParser.json();
 
 sample.get('/', function (req, res) {
-    res.type('json');
-    res.json('{"result":"success"}');
+    SampleService.postConfig((err, body) => {
+      res.type('json');
+      if(err) res.json('{"result":"false"}');
+      else res.json(body);
+    });
 });
 
 // POST /api/users gets JSON bodies 

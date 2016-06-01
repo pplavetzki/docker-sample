@@ -1,0 +1,57 @@
+{
+  	"config-template" : {
+    	"@href" : "/api/space/config-template-management/config-templates/{id}" ,
+    	"@uri" : "/api/space/config-template-management/config-templates/{id}" ,
+    	"id" : "Integer" ,
+    	"name" : "String" ,
+    	"description" : "String" ,
+    	"config-type" : "CONFIG_TEMPLATE" ,
+    	"state" : "String" ,
+    	"os-version" : "String" ,
+    	"current-version" : "Integer" ,
+    	"device-family" : "String" ,
+    	"last-updated-by" : "String" ,
+    	"last-update-time-string" : "String" ,
+    	"template-deployment-status" : "String" ,
+    	"config-template-definition" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-template-definitions/{id}" ,
+      	"@uri" : "/api/space/config-template-management/config-templates/{id}" ,
+      	"id" : "Integer" ,
+      	"name" : "String" ,
+      	"configuration" : {
+        	"@href" :
+        	"/api/space/config-template-management/config-template-definitions/{id}/configuration"
+      	}
+    	} ,
+    	"domain-name" : "String" ,
+    	"domain-id" : "Integer" ,
+    	"domain" : {
+      	"@href" : "/api/space/domain-management/domains/{domainId}"
+    	} ,
+    	"configuration" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/configuration"
+    	} ,
+    	"exec-deploy" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/exec-deploy"
+    	} ,
+    	"exec-undeploy" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/exec-undeploy"
+    	} ,
+    	"exec-audit" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/exec-audit"
+    	} ,
+    	"device-associations" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/device-associations"
+    	} ,
+    	"exec-publish" : {
+      	"@href" :
+      	"/api/space/config-template-management/config-templates/{id}/exec-publish"
+    	}
+  	}
+}
