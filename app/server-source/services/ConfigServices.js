@@ -24,6 +24,14 @@ class ConfigServices {
             else callback(null, body);
         });
    }
+   static getConfigs(params, callback) {
+       let configs = nano.use('configs');
+       params = ((params === undefined) | (!params)) ? {include_docs:true} : params;
+       configs.list(params, (err, body) => {
+            if (err) callback(err);
+            else callback(null, body.rows);
+       });
+   }
 }
 
 export {ConfigServices};

@@ -17,6 +17,16 @@ router.post('/', function (req, res) {
 });
 
 // GET /configs/:id
+router.get('/', function(req, res){
+
+    res.type('json');
+    ConfigServices.getConfigs({include_docs:true}, (err, docs) => {
+        if(err) res.json('{"ok":"false", "message":"' + err.message + '"}');
+        else res.json(docs);
+    });
+});
+
+// GET /configs/:id
 router.get('/:id', function(req, res){
     let id = req.params.id;
     
